@@ -173,7 +173,7 @@ module.exports = function (wagner) {
             // A source in Stripe parlance is something
             // that represents a credit card.
             // It can be a JSON object that contains the credit card
-            // information 
+            // information
             source: req.body.stripeToken,
             description: 'Example charge'
           },
@@ -214,19 +214,9 @@ module.exports = function (wagner) {
   api.get('/product/text/:query', wagner.invoke(function (Product) {
     return function (req, res) {
       Product.
-      find({
-        $text: {
-          $search: req.params.query
-        }
-      }, {
-        score: {
-          $meta: 'textScore'
-        }
-      }).
+      find({ name: { $regex: req.params.query, $options: 'ix' } }).
       sort({
-        score: {
-          $meta: 'textScore'
-        }
+        name: 1
       }).
       limit(10).
       exec(handleMany.bind(null, 'products', res));
@@ -261,9 +251,7 @@ function handleMany(property, res, error, result) {
   if (error) {
     return res.
     status(status.INTERNAL_SERVER_ERROR).
-    json({
-      error: error.toString()
-    });
+    json(error);
   }
 
   var json = {};
