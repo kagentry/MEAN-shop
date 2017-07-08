@@ -1,28 +1,31 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
-exports.AddToCartController = function($scope, $http, $user, $timeout) {
-  $scope.addToCart = function(product) {
-    var obj = { product: product._id, quantity: 1 };
+exports.AddToCartController = function ($scope, $http, $user, $timeout) {
+  $scope.addToCart = function (product) {
+    var obj = {
+      product: product._id,
+      quantity: 1
+    };
     $user.user.data.cart.push(obj);
 
     $http.
-      put('/api/v1/me/cart', $user.user).
-      success(function(data) {
-        $user.loadUser();
-        $scope.success = true;
+    put('/api/v1/me/cart', $user.user).
+    success(function (data) {
+      $user.loadUser();
+      $scope.success = true;
 
-        $timeout(function() {
-          $scope.success = false;
-        }, 5000);
-      });
+      $timeout(function () {
+        $scope.success = false;
+      }, 5000);
+    });
   };
 };
 
-exports.CategoryProductsController = function($scope, $routeParams, $http) {
+exports.CategoryProductsController = function ($scope, $routeParams, $http) {
   var encoded = encodeURIComponent($routeParams.category);
 
   $scope.price = undefined;
 
-  $scope.handlePriceClick = function() {
+  $scope.handlePriceClick = function () {
     if ($scope.price === undefined) {
       $scope.price = -1;
     } else {
@@ -31,54 +34,58 @@ exports.CategoryProductsController = function($scope, $routeParams, $http) {
     $scope.load();
   };
 
-  $scope.load = function() {
-    var queryParams = { price: $scope.price };
+  $scope.load = function () {
+    var queryParams = {
+      price: $scope.price
+    };
     $http.
-      get('/api/v1/product/category/' + encoded, { params: queryParams }).
-      success(function(data) {
-        $scope.products = data.products;
-      });
+    get('/api/v1/product/category/' + encoded, {
+      params: queryParams
+    }).
+    success(function (data) {
+      $scope.products = data.products;
+    });
   };
 
   $scope.load();
 
-  setTimeout(function() {
+  setTimeout(function () {
     $scope.$emit('CategoryProductsController');
   }, 0);
 };
 
-exports.CategoryTreeController = function($scope, $routeParams, $http) {
+exports.CategoryTreeController = function ($scope, $routeParams, $http) {
   var encoded = encodeURIComponent($routeParams.category);
   $http.
-    get('/api/v1/category/id/' + encoded).
-    success(function(data) {
-      $scope.category = data.category;
-      $http.
-        get('/api/v1/category/parent/' + encoded).
-        success(function(data) {
-          $scope.children = data.categories;
-        });
+  get('/api/v1/category/id/' + encoded).
+  success(function (data) {
+    $scope.category = data.category;
+    $http.
+    get('/api/v1/category/parent/' + encoded).
+    success(function (data) {
+      $scope.children = data.categories;
     });
+  });
 
-  setTimeout(function() {
+  setTimeout(function () {
     $scope.$emit('CategoryTreeController');
   }, 0);
 };
 
-exports.CheckoutController = function($scope, $user, $http) {
+exports.CheckoutController = function ($scope, $user, $http) {
   // For update cart
   $scope.user = $user;
 
-  $scope.updateCart = function() {
+  $scope.updateCart = function () {
     $http.
-      put('/api/v1/me/cart', $user.user).
-      success(function(data) {
-        $scoped.updated = true;
-      });
+    put('/api/v1/me/cart', $user.user).
+    success(function (data) {
+      $scoped.updated = true;
+    });
   };
 
   // For checkout
-  Stripe.setPublishableKey('pk_test_KVC0AphhVxm52zdsM4WoBstU');
+  Stripe.setPublishableKey('pk_test_JEOxDKkmMEkFK71xiZIP0b4O');
 
   $scope.stripeToken = {
     number: '4242424242424242',
@@ -87,65 +94,64 @@ exports.CheckoutController = function($scope, $user, $http) {
     exp_year: '2017'
   };
 
-  $scope.checkout = function() {
+  $scope.checkout = function () {
     $scope.error = null;
-    Stripe.card.createToken($scope.stripeToken, function(status, response) {
+    Stripe.card.createToken($scope.stripeToken, function (status, response) {
       if (status.error) {
         $scope.error = status.error;
         return;
       }
 
       $http.
-        post('/api/v1/checkout', { stripeToken: response.id }).
-        success(function(data) {
-          console.log("I am being charged!");
-          $scope.checkedOut = true;
-          $user.user.data.cart = [];
-        });
+      post('/api/v1/checkout', {
+        stripeToken: response.id
+      }).
+      success(function (data) {
+        $scope.checkedOut = true;
+        $user.user.data.cart = [];
+      });
     });
   };
 };
 
-exports.NavBarController = function($scope, $user) {
+exports.NavBarController = function ($scope, $user) {
   $scope.user = $user;
 
-  setTimeout(function() {
+  setTimeout(function () {
     $scope.$emit('NavBarController');
   }, 0);
 };
 
-exports.ProductDetailsController = function($scope, $routeParams, $http) {
+exports.ProductDetailsController = function ($scope, $routeParams, $http) {
   var encoded = encodeURIComponent($routeParams.id);
 
   $http.
-    get('/api/v1/product/id/' + encoded).
-    success(function(data) {
-      $scope.product = data.product;
-    });
+  get('/api/v1/product/id/' + encoded).
+  success(function (data) {
+    $scope.product = data.product;
+  });
 
-  setTimeout(function() {
+  setTimeout(function () {
     $scope.$emit('ProductDetailsController');
   }, 0);
 };
 
-exports.SearchBarController = function($scope, $http) {
-  // TODO: this function should make an HTTP request to
-  // `/api/v1/product/text/:searchText` and expose the response's
-  // `products` property as `results` to the scope.
-  $scope.update = function() {
-    var q = encodeURIComponent($scope.searchText);
+exports.SearchBarController = function ($scope, $http) {
+  $scope.update = function () {
+    var encoded = encodeURIComponent($scope.searchText);
+
     $http.
-      get('/api/v1/product/text/' + q).
-      success(function(data) {
-        $scope.results = data.products;
-      });
+    get('/api/v1/product/text/' + encoded).
+    success(function (data) {
+      $scope.results = data.products;
+    });
+
   };
 
-  setTimeout(function() {
+  setTimeout(function () {
     $scope.$emit('SearchBarController');
   }, 0);
 };
-
 },{}],2:[function(require,module,exports){
 exports.addToCart = function() {
   return {
